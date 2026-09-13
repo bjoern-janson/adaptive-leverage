@@ -1,5 +1,6 @@
 name: Publish exact audited ALCF-V2-0 history
 
+# Payload complete; exact-history publication gate.
 on:
   push:
     branches:
