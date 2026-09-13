@@ -1,6 +1,5 @@
-name: Publish exact audited ALCF-V2-0 history
+name: Diagnose ALCF-V2-0 publication payload
 
-# Diagnose and publish exact audited history.
 on:
   push:
     branches:
@@ -9,60 +8,26 @@ on:
       - .github/workflows/alcf-v2-exact-publish.yml
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  publish:
+  diagnose:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: bootstrap/alcf-v2-exact-publish
-
-      - name: Reconstruct and verify audited bundle
+      - name: Hash staged payload segments
         shell: bash
         run: |
           set -euo pipefail
-          : > /tmp/alcf-v2.bundle
-          for f in \
-            .bootstrap/part-00.b64 \
-            .bootstrap/part-01.b64 \
-            .bootstrap/part-02.b64 \
-            .bootstrap/part-03.b64 \
-            .bootstrap/part-04.b64 \
-            .bootstrap/part-05.b64 \
-            .bootstrap/tail-00.b64 \
-            .bootstrap/tail-01.b64 \
-            .bootstrap/tail-02.b64 \
-            .bootstrap/tail-03.b64 \
-            .bootstrap/tail-04.b64 \
-            .bootstrap/tail-05.b64 \
-            .bootstrap/tail-06-00.b64 \
-            .bootstrap/tail-06-01.b64 \
-            .bootstrap/tail-06-02.b64 \
-            .bootstrap/tail-07-00.b64 \
-            .bootstrap/tail-07-01.b64 \
-            .bootstrap/tail-07-02.b64
-          do
-            echo "DECODING $f"
-            if ! base64 -d "$f" >> /tmp/alcf-v2.bundle; then
-              echo "INVALID_BASE64 $f"
-              exit 1
-            fi
+          for f in .bootstrap/part-04.b64 .bootstrap/part-05.b64 .bootstrap/tail-01.b64; do
+            echo "FILE $f bytes=$(wc -c < "$f")"
+            rm -f /tmp/seg-*
+            split -b 4000 -d -a 2 "$f" /tmp/seg-
+            i=0
+            for s in /tmp/seg-*; do
+              echo "SEG $f $i bytes=$(wc -c < "$s") sha256=$(sha256sum "$s" | awk '{print $1}')"
+              i=$((i+1))
+            done
           done
-          echo "RECONSTRUCTED_BYTES $(wc -c < /tmp/alcf-v2.bundle)"
-          test "$(wc -c < /tmp/alcf-v2.bundle)" = "146969"
-          echo "f136d36fbcfe5df9a1c0eadd1b382fb4ee20e34d8b7f28e0e4f76a31a98b00e0  /tmp/alcf-v2.bundle" | sha256sum -c -
-          rm -rf /tmp/alcf-v2-import
-          git clone --branch impl/alcf-v2-0 /tmp/alcf-v2.bundle /tmp/alcf-v2-import
-          test "$(git -C /tmp/alcf-v2-import rev-parse HEAD)" = "8fcad36b84caa8a496f29b16cf29257565c75a41"
-          git -C /tmp/alcf-v2-import fsck --full
-
-      - name: Publish exact audited branch
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          git -C /tmp/alcf-v2-import remote add publish "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git -C /tmp/alcf-v2-import push publish 8fcad36b84caa8a496f29b16cf29257565c75a41:refs/heads/impl/alcf-v2-0
