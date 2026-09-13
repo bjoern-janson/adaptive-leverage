@@ -1,0 +1,34 @@
+name: Repair exact ALCF-V2-0 p04 transport object
+
+on:
+  push:
+    branches:
+      - bootstrap/alcf-v2-exact-publish
+    paths:
+      - .github/workflows/alcf-v2-repair-p04.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: bootstrap/alcf-v2-exact-publish
+      - name: Reconstruct exact p04-r0-2 from verified quarters
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'c0c46114d58494c1e4d27829d827f86d20a821d75a5f834c5f0428a6139a2b91  .bootstrap/p04-r0-2-s0.b64' | sha256sum -c -
+          echo 'e1794a99ca968433db5a878662f52f29119f38290a61be864c760d2265815e25  .bootstrap/p04-r0-2-s1.b64' | sha256sum -c -
+          echo 'cab81177bd792401ebd77adb442f87577d7e9f46f9a077fd2c996a495de69be7  .bootstrap/p04-r0-2-s2.b64' | sha256sum -c -
+          echo 'bebc7b3b5569e4650e09129964a114dea8a4a06bf6a8fac2633f1fc811ed2f5b  .bootstrap/p04-r0-2-s3.b64' | sha256sum -c -
+          cat .bootstrap/p04-r0-2-s0.b64 .bootstrap/p04-r0-2-s1.b64 .bootstrap/p04-r0-2-s2.b64 .bootstrap/p04-r0-2-s3.b64 > .bootstrap/p04-r0-2.b64
+          echo '65c804454d0e3e11011fd7bc2a44e43f5be2af818fd9b486fbbc145b52751a8d  .bootstrap/p04-r0-2.b64' | sha256sum -c -
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .bootstrap/p04-r0-2.b64
+          git diff --cached --quiet || git commit -m 'Repair exact ALCF-V2-0 p04 transport object'
+          git push origin HEAD:bootstrap/alcf-v2-exact-publish
