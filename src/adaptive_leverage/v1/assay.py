@@ -9,13 +9,24 @@ from typing import Mapping
 from adaptive_leverage.interventions import apply_valid_scope_closure
 from adaptive_leverage.model import (
     A0,
+    A1,
+    C_STAR,
+    E_STAR,
+    OMEGA_STAR,
+    O_C,
+    W_C,
     W_N,
+    AuthorityStatus,
     ImplementationError,
     MachineState,
+    PolicyMode,
+    Provenance,
+    ScopeStatus,
+    WarrantStatus,
     canonical_state_bytes,
     run_dynamic_episode,
 )
-from adaptive_leverage.v1.episodes import run_v1_normal_episode
+from adaptive_leverage.v1.episodes import run_v1_normal_episode, run_v1_world_episode
 from adaptive_leverage.v1.mechanisms import (
     CustodyCheck,
     MechanismArtifact,
@@ -44,6 +55,23 @@ class NormalObservation:
     cost: int
     trace: tuple[V1TraceEvent, ...]
     mechanism_artifact_sha256: str | None
+
+
+@dataclass(frozen=True)
+class CorrectionObservation:
+    arm: str
+    world: str
+    context: str
+    observation: str
+    evidence: str
+    contradiction_id: str | None
+    action: str
+    trace: tuple[V1TraceEvent, ...]
+    route_nonempty: bool
+    warrant_drift: bool
+    scope_closed_valid: bool
+    licensing_epistemic_event: bool
+    route_loss_provenance: str
 
 
 class JointAdmissionReason(str, Enum):
@@ -235,3 +263,144 @@ def require_corrective_release(
         or token.admission_sha256 != _admission_digest(hashes)
     ):
         raise ImplementationError("V1 corrective release token mismatch")
+
+
+def qualified_v1_route(trace: tuple[V1TraceEvent, ...]) -> bool:
+    validate_v1_trace(trace)
+
+    evidence_index = next((i for i, event in enumerate(trace) if event.evidence == E_STAR), None)
+    if evidence_index is None:
+        return False
+    warrant_index = next(
+        (
+            i
+            for i, event in enumerate(trace[evidence_index + 1 :], start=evidence_index + 1)
+            if event.warrant_status == WarrantStatus.CORRECTION.value
+        ),
+        None,
+    )
+    if warrant_index is None:
+        return False
+    authority_index = next(
+        (
+            i
+            for i, event in enumerate(trace[warrant_index + 1 :], start=warrant_index + 1)
+            if event.authority_status == AuthorityStatus.CORR_AUTH.value
+        ),
+        None,
+    )
+    if authority_index is None:
+        return False
+    policy_index = next(
+        (
+            i
+            for i, event in enumerate(trace[authority_index + 1 :], start=authority_index + 1)
+            if event.policy_mode_after == PolicyMode.CORRECTED.value
+        ),
+        None,
+    )
+    if policy_index is None:
+        return False
+    action_index = next(
+        (
+            i
+            for i, event in enumerate(trace[policy_index + 1 :], start=policy_index + 1)
+            if event.action == A1
+        ),
+        None,
+    )
+    return action_index is not None
+
+
+def correction_identity_valid(observation: CorrectionObservation) -> bool:
+    if (
+        observation.world != W_C
+        or observation.context != OMEGA_STAR
+        or observation.observation != O_C
+        or observation.evidence != E_STAR
+        or observation.contradiction_id != C_STAR
+        or observation.scope_closed_valid
+    ):
+        return False
+    trace = observation.trace
+    try:
+        validate_v1_trace(trace)
+    except Exception:
+        return False
+    return (
+        any(event.scope_status == ScopeStatus.OPEN.value for event in trace)
+        and any(event.warrant_status == WarrantStatus.CORRECTION.value for event in trace)
+        and any(event.authority_status == AuthorityStatus.CORR_AUTH.value for event in trace)
+    )
+
+
+def replay_v1_correction(
+    arm: str,
+    state: MachineState,
+    *,
+    artifact: MechanismArtifact | None,
+    mechanism_artifact_sha256_value: str | None,
+    release_token: CorrectiveReleaseToken | None,
+    built: Mapping[MechanismKind, tuple[MechanismArtifact, MechanismCustodyRecord]],
+    run_id: str,
+) -> CorrectionObservation:
+    # This is the release boundary: validate before constructing any corrective episode.
+    require_corrective_release(release_token, built)
+
+    if arm in {"B", "P", "T"}:
+        if artifact is None or mechanism_artifact_sha256_value is None:
+            raise ImplementationError(f"{arm} corrective replay requires finalized mechanism")
+        expected_kind = {"B": MechanismKind.B, "P": MechanismKind.P, "T": MechanismKind.T}[arm]
+        if artifact.kind is not expected_kind:
+            raise ImplementationError(f"{arm} corrective mechanism identity mismatch")
+        if mechanism_artifact_sha256(artifact) != mechanism_artifact_sha256_value:
+            raise ImplementationError(f"{arm} corrective mechanism hash mismatch")
+        episode = run_v1_world_episode(W_C, state, artifact)
+        licensing = False
+        route_loss_provenance = (
+            Provenance.COMPILE_DISPATCH.value
+            if any(step.provenance is Provenance.COMPILE_DISPATCH for step in episode.steps)
+            else Provenance.BASE_MACHINE.value
+        )
+    elif arm == "C":
+        if artifact is not None or mechanism_artifact_sha256_value is not None:
+            raise ImplementationError("C control must not bind a V1 mechanism")
+        episode = run_dynamic_episode(W_C, state)
+        licensing = False
+        route_loss_provenance = Provenance.BASE_MACHINE.value
+    elif arm == "E":
+        if artifact is not None or mechanism_artifact_sha256_value is not None:
+            raise ImplementationError("E control must not bind a V1 mechanism")
+        if state.scope_status is not ScopeStatus.CLOSED_VALID:
+            raise ImplementationError("E corrective replay requires CLOSED_VALID scope")
+        episode = run_dynamic_episode(W_C, state)
+        licensing = True
+        route_loss_provenance = Provenance.VALID_SCOPE_CLOSURE.value
+    else:
+        raise ImplementationError(f"unknown V1 arm: {arm!r}")
+
+    trace = build_v1_trace(
+        episode,
+        arm=arm,
+        run_id=run_id,
+        mechanism_artifact_sha256=mechanism_artifact_sha256_value,
+    )
+    validate_v1_trace(trace)
+    route_nonempty = qualified_v1_route(trace)
+    provisional = CorrectionObservation(
+        arm=arm,
+        world=episode.world,
+        context=episode.context,
+        observation=episode.observation,
+        evidence=episode.evidence,
+        contradiction_id=episode.contradiction_id,
+        action=episode.action,
+        trace=trace,
+        route_nonempty=route_nonempty,
+        warrant_drift=False,
+        scope_closed_valid=state.scope_status is ScopeStatus.CLOSED_VALID,
+        licensing_epistemic_event=licensing,
+        route_loss_provenance=route_loss_provenance,
+    )
+    drift = arm in {"B", "P", "T"} and not correction_identity_valid(provisional)
+    return replace(provisional, warrant_drift=drift)
