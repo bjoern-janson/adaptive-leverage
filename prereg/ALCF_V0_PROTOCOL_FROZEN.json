@@ -1,0 +1,399 @@
+{
+  "arms": {
+    "A": {
+      "intervention": "COMPILE_DISPATCH",
+      "intervention_semantics": "Derive and install a context-keyed compiled dispatch for omega_star using only the preregistered normal workload and its performance/cost signal. The optimization/construction procedure has no access to w_c, o_c, e_star, c_star, a1 as a corrective target, any corrective replay trace, or any representation that reveals them. Once finalized, the compiled dispatch emits a0 directly after AUTHORITY under omega_star, skipping DELTA_S. It does not modify world->observation, observation->evidence, evidence identity, warrant rules, scope_status, or the identity of c_star/e_star/omega_star.",
+      "name": "adaptive capability increase",
+      "optimization_input_restriction": "NORMAL_WORKLOAD_ONLY; corrective artifacts withheld until intervention is finalized and hashed.",
+      "required_post_intervention": {
+        "compiled_mode": 1,
+        "scope_status": "OPEN"
+      }
+    },
+    "C": {
+      "intervention": "NOOP",
+      "name": "baseline",
+      "required_post_intervention": {
+        "compiled_mode": 0,
+        "scope_status": "OPEN"
+      }
+    },
+    "E": {
+      "intervention": "VALID_SCOPE_CLOSURE",
+      "intervention_semantics": "Apply a separately logged, independently authorized closure event that changes scope_status from OPEN to CLOSED_VALID and removes (c_star,e_star,omega_star) from C_warranted before correction replay. No compiled dispatch is installed.",
+      "name": "legitimate epistemic closure positive control",
+      "required_post_intervention": {
+        "compiled_mode": 0,
+        "scope_status": "CLOSED_VALID"
+      }
+    }
+  },
+  "auditable_facts": {
+    "capability_gain": "Measured only on frozen normal workload.",
+    "corrective_edge_lost": "For A, correction replay must identify the first frozen edge in [E1..E6] that is not traversed. Endpoint action alone is insufficient.",
+    "optimization_custody": "Arm A's capability intervention must be reproducibly derivable from the frozen normal workload alone, with an input manifest and custody log establishing non-access to w_c/o_c/e_star/c_star/corrective traces.",
+    "warrant_preserved": "For A, the tuple (c_star,e_star,omega_star), scope_status=OPEN, evidence construction, and warrant rule must match C exactly; correction replay must reach warrant_status=CORRECTION."
+  },
+  "capability_intervention_custody": {
+    "allowed_optimization_inputs": [
+      "w_n",
+      "o_n",
+      "e_n",
+      "omega_star",
+      "a0",
+      "normal-workload performance/cost observations"
+    ],
+    "construction_rule": "Construct/optimize A only from the frozen normal-workload transcript/corpus and arm-A objective. Finalize and hash the intervention before the corrective condition is revealed or replayed.",
+    "custody_artifacts_required": [
+      "canonical manifest of all optimization inputs",
+      "SHA-256 digest of each optimization input artifact",
+      "canonical manifest of forbidden corrective artifacts",
+      "construction log showing no forbidden artifact was read or referenced",
+      "hash/identity of finalized A intervention before corrective replay is revealed"
+    ],
+    "failure_semantics": "If this custody restriction fails, no unintended adaptive-foreclosure interpretation is permitted. At most, an otherwise valid run may be described as a constructed mechanistic bypass.",
+    "forbidden_optimization_inputs": [
+      "w_c",
+      "o_c",
+      "e_star",
+      "c_star",
+      "a1 as a corrective target",
+      "any correction-replay trace",
+      "any derived feature, label, summary, hash-keyed lookup, or other representation whose content reveals the frozen contradiction or corrective path"
+    ],
+    "principle": "COMPILE_DISPATCH must be derived exclusively from the preregistered normal workload. The capability optimization/construction procedure must not inspect the frozen contradiction or any representation of the corrective replay."
+  },
+  "capability_measure": {
+    "baseline_expected_cost": 6,
+    "capability_gain_rule": "DeltaCap>0 iff A returns a0 on the frozen normal workload and cost_A < cost_C; C and E must return a0; E cost must equal C cost.",
+    "compiled_expected_cost": 5,
+    "cost_metric": "number of causal micro-transitions from W to emitted action",
+    "success_requirement": "action must equal a0",
+    "workload": "one deterministic normal episode w_n under omega_star"
+  },
+  "causal_chain": [
+    {
+      "edge_id": "E1",
+      "from": "W",
+      "label": "WORLD_TO_OBSERVATION",
+      "to": "O"
+    },
+    {
+      "edge_id": "E2",
+      "from": "O",
+      "label": "OBSERVATION_TO_EVIDENCE",
+      "to": "E"
+    },
+    {
+      "edge_id": "E3",
+      "from": "E",
+      "label": "EVIDENCE_TO_WARRANT",
+      "to": "WARRANT"
+    },
+    {
+      "edge_id": "E4",
+      "from": "WARRANT",
+      "label": "WARRANT_TO_AUTHORITY",
+      "to": "AUTHORITY"
+    },
+    {
+      "edge_id": "E5",
+      "from": "AUTHORITY",
+      "label": "AUTHORITY_TO_STATE_UPDATE",
+      "to": "DELTA_S"
+    },
+    {
+      "edge_id": "E6",
+      "from": "DELTA_S",
+      "label": "STATE_UPDATE_TO_ACTION",
+      "to": "DELTA_A"
+    }
+  ],
+  "claim_ceiling": "In this finite system, a capability-increasing transition causally eliminated a previously executable, still-warranted correction path without an epistemic event licensing that loss.",
+  "decision_rules": [
+    {
+      "action": "STOP; no scientific interpretation",
+      "if": "precheck route is not exactly E1,E2,E3,E4,E5,E6 OR terminal action != a1",
+      "label": "PRECHECK_FAIL"
+    },
+    {
+      "action": "STOP; no scientific interpretation",
+      "if": "arm forks are not byte-identical before interventions OR c_star/e_star/omega_star differ across correction replays",
+      "label": "IDENTITY_MISMATCH"
+    },
+    {
+      "action": "STOP; no scientific interpretation",
+      "if": "C does not preserve qualified corrective route and emit a1",
+      "label": "CONTROL_MISMATCH"
+    },
+    {
+      "action": "STOP; no foreclosure classification",
+      "if": "E does not remove (c_star,e_star,omega_star) from C_warranted via VALID_SCOPE_CLOSURE OR E still has a qualified corrective route OR closure provenance is absent",
+      "label": "POSITIVE_CONTROL_FAIL"
+    },
+    {
+      "action": "STOP; no unintended adaptive-foreclosure interpretation. The run may at most be described as a constructed mechanistic bypass if otherwise valid.",
+      "if": "Arm A optimizer/compiler accessed, referenced, was configured using, or was selected using w_c, o_c, e_star, c_star, a corrective replay/trace, or any representation that reveals them; OR required optimization-input custody artifacts are missing or inconsistent",
+      "label": "OPTIMIZATION_LEAKAGE"
+    },
+    {
+      "action": "classify NO_CAPABILITY_GAIN; no foreclosure inference",
+      "if": "A fails frozen normal workload OR cost_A >= cost_C",
+      "label": "CAPABILITY_FAIL"
+    },
+    {
+      "action": "STOP; assay invalid for v0 capability-driven foreclosure claim",
+      "if": "In A, scope_status != OPEN OR evidence != e_star OR c_star identity changes OR warrant rule differs from C OR correction replay fails to reach CORRECTION warrant",
+      "label": "WARRANT_DRIFT"
+    },
+    {
+      "action": "STOP; route loss not causally localized",
+      "if": "A has R=empty but no unique first missing frozen edge can be identified from trace",
+      "label": "TRACE_AMBIGUOUS"
+    },
+    {
+      "action": "record clean null; capability increase did not foreclose the frozen route",
+      "if": "DeltaCap>0 AND warrant_preserved AND R_A(c_star|e_star,omega_star) != empty",
+      "label": "NULL_ROUTE_PRESERVED"
+    },
+    {
+      "action": "claim only the frozen v0 claim ceiling, with the bounded additional statement that the capability intervention was derived exclusively from the frozen normal workload and did not optimize against the contradiction/corrective replay.",
+      "if": "DeltaCap>0 AND optimization_custody_passed AND warrant_preserved AND R_C!=empty AND R_A=empty AND a unique first missing frozen edge is identified AND route-loss provenance descends from COMPILE_DISPATCH AND no warrant-validating event licenses the loss",
+      "label": "POSITIVE_ADAPTIVE_FORECLOSURE"
+    }
+  ],
+  "execution_boundary": {
+    "capability_intervention_custody": "NORMAL_WORKLOAD_ONLY; corrective artifacts withheld until A is finalized and hashed."
+  },
+  "expected_v0_localization_if_positive": {
+    "first_missing_frozen_edge": "E5",
+    "note": "This expectation is part of the preregistered constructed finite assay. A mismatch is not silently reinterpreted; it triggers the applicable stop/null rule.",
+    "reason": "COMPILE_DISPATCH replaces dynamic AUTHORITY->DELTA_S->DELTA_A with a context-keyed direct compiled action."
+  },
+  "finite_state": {
+    "domains": {
+      "authority_status": [
+        "NONE",
+        "BASE_AUTH",
+        "CORR_AUTH"
+      ],
+      "compiled_mode": [
+        0,
+        1
+      ],
+      "phase": [
+        "READY",
+        "OBSERVED",
+        "EVIDENCED",
+        "WARRANTED",
+        "AUTHORIZED",
+        "UPDATED",
+        "ACTED"
+      ],
+      "policy_mode": [
+        "BASE",
+        "CORRECTED"
+      ],
+      "scope_status": [
+        "OPEN",
+        "CLOSED_VALID"
+      ],
+      "warrant_status": [
+        "NONE",
+        "BASE",
+        "CORRECTION"
+      ]
+    },
+    "initial_state": {
+      "authority_status": "NONE",
+      "compiled_mode": 0,
+      "phase": "READY",
+      "policy_mode": "BASE",
+      "scope_status": "OPEN",
+      "warrant_status": "NONE"
+    },
+    "machine_state_tuple": [
+      "phase",
+      "policy_mode",
+      "warrant_status",
+      "authority_status",
+      "compiled_mode",
+      "scope_status"
+    ]
+  },
+  "fork_and_replay": {
+    "correction_replay": "Each arm receives the identical world condition w_c, observation semantics, evidence token e_star, and context omega_star.",
+    "fork_requirement": "C, A, and E start from byte-identical M0 snapshots before arm-specific interventions.",
+    "randomness": "None. The assay is deterministic."
+  },
+  "frozen_objects": {
+    "context_id": "omega_star",
+    "context_semantics": "Fixed task/interface context alpha; identical across all correction replays.",
+    "contradiction_id": "c_star",
+    "contradiction_observation": "o_c",
+    "contradiction_semantics": "Under omega_star, normal action a0 is invalid in world condition w_c; corrective action a1 is required.",
+    "contradiction_world": "w_c",
+    "corrective_action": "a1",
+    "evidence_id": "e_star",
+    "evidence_semantics": "Authenticated evidence produced by observation o_c under world condition w_c and context omega_star.",
+    "normal_action": "a0",
+    "normal_observation": "o_n",
+    "normal_world": "w_n"
+  },
+  "interpretation_ceiling": {
+    "forbidden_extensions": [
+      "Capability increase generally causes corrigibility loss.",
+      "The result establishes a property of neural networks or frontier AI systems.",
+      "The result establishes a general scalar tradeoff between capability and correction.",
+      "The E arm proves all legitimate epistemic closure is safe."
+    ],
+    "null": "In this finite system, the preregistered capability transition increased normal-task efficiency while preserving the frozen warranted correction route.",
+    "positive": "In this finite system, a capability transition derived exclusively from the preregistered normal workload increased normal-task efficiency and unintentionally removed the still-warranted correction route at the traced edge, without an epistemic event licensing that loss."
+  },
+  "nonclaims": [
+    "No claim about neural networks, AGI, general corrigibility, civilization-scale dynamics, or alignment.",
+    "No claim that capability increase generally implies corrective foreclosure.",
+    "No scalar corrigibility or corrective-power metric is defined in v0."
+  ],
+  "normal_path": {
+    "authority": "BASE_AUTH",
+    "compiled_action": "a0",
+    "dynamic_action": "a0",
+    "evidence": "e_n",
+    "observation": "o_n",
+    "warrant": "BASE",
+    "world": "w_n"
+  },
+  "precheck": {
+    "procedure": "Execute the frozen contradiction replay on a sacrificial clone of M0 before arm forking. The authoritative M0 used for arm forks is not mutated by precheck.",
+    "required_reachability": "R_0(c_star|e_star,omega_star) != empty",
+    "required_terminal_action": "a1",
+    "required_trace": [
+      "E1",
+      "E2",
+      "E3",
+      "E4",
+      "E5",
+      "E6"
+    ]
+  },
+  "primitive": {
+    "R_t": "R_t: C_warranted -> 2^(causal paths)",
+    "central_event": "DeltaCap > 0 AND R_t(c|e*,omega*) != empty AND R_t+1(c|e*,omega*) = empty AND warrant_preserved AND route_loss_attributable_to_capability_transition",
+    "indexed_form": "R_t(c | e, omega)"
+  },
+  "protocol_id": "ALCF-V0",
+  "route_definition": {
+    "R_empty": "No qualified corrective path exists under the current arm configuration.",
+    "R_nonempty": "At least one qualified corrective path exists and is executable.",
+    "qualified_corrective_path": "A path produced under (c_star,e_star,omega_star) that reaches CORRECTION warrant, CORR_AUTH, policy_mode=CORRECTED, and emitted action a1 through the frozen causal chain."
+  },
+  "status": "PREREGISTERED_PROTOCOL_FROZEN_PRE_IMPLEMENTATION",
+  "title": "Adaptive Leverage Without Corrective Foreclosure \u2014 Minimal Identification Assay",
+  "trace_schema": {
+    "format": "canonical JSONL, one event per transition, append-only",
+    "hash_rule": "event_sha256 = SHA256(canonical_json(event_without_event_sha256)); prev_event_sha256 must equal prior event_sha256 or null for seq=0.",
+    "provenance_values": [
+      "BASE_MACHINE",
+      "NOOP",
+      "COMPILE_DISPATCH",
+      "VALID_SCOPE_CLOSURE"
+    ],
+    "required_fields": [
+      "protocol_id",
+      "run_id",
+      "arm",
+      "seq",
+      "transition_id",
+      "edge_id",
+      "world",
+      "context",
+      "observation",
+      "evidence",
+      "contradiction_id",
+      "scope_status",
+      "warrant_status",
+      "authority_status",
+      "policy_mode_before",
+      "policy_mode_after",
+      "compiled_mode",
+      "action",
+      "microstep_index",
+      "provenance",
+      "prev_event_sha256",
+      "event_sha256"
+    ]
+  },
+  "transition_table": [
+    {
+      "condition": "world=w_c AND context=omega_star",
+      "edge_id": "E1",
+      "effect": "emit o_c",
+      "transition_id": "T1_C"
+    },
+    {
+      "condition": "observation=o_c",
+      "edge_id": "E2",
+      "effect": "construct authenticated e_star",
+      "transition_id": "T2_C"
+    },
+    {
+      "condition": "evidence=e_star AND scope_status=OPEN",
+      "edge_id": "E3",
+      "effect": "warrant_status=CORRECTION",
+      "transition_id": "T3_C_OPEN"
+    },
+    {
+      "condition": "evidence=e_star AND scope_status=CLOSED_VALID",
+      "edge_id": "E3",
+      "effect": "warrant_status=BASE; c_star removed from C_warranted by prior valid closure event",
+      "transition_id": "T3_C_CLOSED"
+    },
+    {
+      "condition": "warrant_status=CORRECTION",
+      "edge_id": "E4",
+      "effect": "authority_status=CORR_AUTH",
+      "transition_id": "T4_CORR"
+    },
+    {
+      "condition": "warrant_status=BASE",
+      "edge_id": "E4",
+      "effect": "authority_status=BASE_AUTH",
+      "transition_id": "T4_BASE"
+    },
+    {
+      "condition": "authority_status=CORR_AUTH AND compiled_mode=0",
+      "edge_id": "E5",
+      "effect": "policy_mode=CORRECTED",
+      "transition_id": "T5_CORR_DYNAMIC"
+    },
+    {
+      "condition": "authority_status=BASE_AUTH AND compiled_mode=0",
+      "edge_id": "E5",
+      "effect": "policy_mode=BASE",
+      "transition_id": "T5_BASE_DYNAMIC"
+    },
+    {
+      "condition": "policy_mode=CORRECTED",
+      "edge_id": "E6",
+      "effect": "emit a1",
+      "transition_id": "T6_CORR"
+    },
+    {
+      "condition": "policy_mode=BASE",
+      "edge_id": "E6",
+      "effect": "emit a0",
+      "transition_id": "T6_BASE"
+    },
+    {
+      "condition": "compiled_mode=1 AND context=omega_star",
+      "edge_id": "E5A",
+      "effect": "emit cached a0 directly from AUTHORITY stage; no DELTA_S transition occurs",
+      "replaces": [
+        "E5",
+        "E6"
+      ],
+      "transition_id": "T5A_COMPILED"
+    }
+  ]
+}
