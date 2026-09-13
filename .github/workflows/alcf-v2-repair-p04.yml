@@ -17,61 +17,26 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: bootstrap/alcf-v2-exact-publish
-      - name: Recover exact p04-r0-2 from resident redundant copies
+      - name: Decode hash-gated hex transport into exact p04-r0-2
         shell: bash
         run: |
           set -euo pipefail
-          expected=(
-            c0c46114d58494c1e4d27829d827f86d20a821d75a5f834c5f0428a6139a2b91
-            e1794a99ca968433db5a878662f52f29119f38290a61be864c760d2265815e25
-            cab81177bd792401ebd77adb442f87577d7e9f46f9a077fd2c996a495de69be7
-            bebc7b3b5569e4650e09129964a114dea8a4a06bf6a8fac2633f1fc811ed2f5b
-          )
-          : > /tmp/p04-r0-2.b64
-          for i in 0 1 2 3; do
-            found=''
-            want=${expected[$i]}
-            echo "SEARCH quarter=$i expected=$want"
+          echo '9b3c2b973ba195cb33e83bcf6898ce7ffa47194a48ed86bf1d721495f7abebfc  .bootstrap/p04hex-0.txt' | sha256sum -c -
+          echo 'dffd98940c4110c5efbf38989f71dbc5ae1d99ded01dfc75300a8a6a72480fe0  .bootstrap/p04hex-1.txt' | sha256sum -c -
+          echo '09d677faf5c96b1803543b4d3bfb409939a6d4b11200bbcb60083e9982b65ade  .bootstrap/p04hex-2.txt' | sha256sum -c -
+          echo 'cb06bdaa6353f993e973235855c995d89e1a766c1f4dccd5e7efa9d121bf01d1  .bootstrap/p04hex-3.txt' | sha256sum -c -
+          echo '0a701b9a1d28980266c7250242d15349e2e301b18fde1088a1e58b62bdd4ce0e  .bootstrap/p04hex-4.txt' | sha256sum -c -
+          echo '919240185381232768c15a56c4a2ecf221f71c26f94158f2599ccd2b52d62702  .bootstrap/p04hex-5.txt' | sha256sum -c -
+          echo 'aaae48bd933db0b1b4a01e6f1dd80240e1a5dbb77b87c2437db74b83d69c832d  .bootstrap/p04hex-6.txt' | sha256sum -c -
+          echo '17d0434f7c9d4c46b9285bd6ef4da4bca9f215f6f82133578e6c7d57cec50c12  .bootstrap/p04hex-7.txt' | sha256sum -c -
 
-            # candidate spec: file:canonical_offset:radius
-            candidates=(
-              ".bootstrap/p04-r0-2.b64:$((i*1000)):4"
-              ".bootstrap/p04-r0-2-s$i.b64:0:4"
-              ".bootstrap/part-04-04.b64:$((i*1000)):4"
-              ".bootstrap/part-04.b64:$((16000+i*1000)):8"
-              ".bootstrap/p04-r0.b64:$((8000+i*1000)):8"
-            )
-
-            for spec in "${candidates[@]}"; do
-              IFS=: read -r src base radius <<< "$spec"
-              size=$(wc -c < "$src")
-              start=$((base-radius))
-              [ "$start" -lt 0 ] && start=0
-              end=$((base+radius))
-              max_start=$((size-1000))
-              [ "$end" -gt "$max_start" ] && end=$max_start
-              [ "$end" -lt "$start" ] && continue
-              for off in $(seq "$start" "$end"); do
-                dd if="$src" of=/tmp/candidate bs=1 skip="$off" count=1000 status=none
-                [ "$(wc -c < /tmp/candidate)" = "1000" ] || continue
-                got=$(sha256sum /tmp/candidate | awk '{print $1}')
-                if [ "$got" = "$want" ]; then
-                  echo "EXACT quarter=$i source=$src offset=$off"
-                  cat /tmp/candidate >> /tmp/p04-r0-2.b64
-                  found=1
-                  break 2
-                fi
-              done
-            done
-
-            if [ -z "$found" ]; then
-              echo "NO_EXACT_COPY quarter=$i"
-              exit 1
-            fi
-          done
-
+          cat .bootstrap/p04hex-{0,1,2,3,4,5,6,7}.txt > /tmp/p04-r0-2.hex
+          test "$(wc -c < /tmp/p04-r0-2.hex)" = "8000"
+          echo '684cdae6e9d82eb01de11307e52c0073eea33acbae68f7d4e6755e0dbf63b7b7  /tmp/p04-r0-2.hex' | sha256sum -c -
+          xxd -r -p /tmp/p04-r0-2.hex > /tmp/p04-r0-2.b64
           test "$(wc -c < /tmp/p04-r0-2.b64)" = "4000"
           echo '65c804454d0e3e11011fd7bc2a44e43f5be2af818fd9b486fbbc145b52751a8d  /tmp/p04-r0-2.b64' | sha256sum -c -
+
           cp /tmp/p04-r0-2.b64 .bootstrap/p04-r0-2.b64
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
