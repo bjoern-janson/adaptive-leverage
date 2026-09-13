@@ -17,12 +17,33 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: bootstrap/alcf-v2-exact-publish
-      - name: Trim transport padding and verify exact p04-r0-2
+      - name: Recover exact p04-r0-2 from redundant quarters
         shell: bash
         run: |
           set -euo pipefail
-          test "$(wc -c < .bootstrap/p04-r0-2.b64)" = "4002"
-          head -c 4000 .bootstrap/p04-r0-2.b64 > /tmp/p04-r0-2.b64
+          expected=(
+            c0c46114d58494c1e4d27829d827f86d20a821d75a5f834c5f0428a6139a2b91
+            e1794a99ca968433db5a878662f52f29119f38290a61be864c760d2265815e25
+            cab81177bd792401ebd77adb442f87577d7e9f46f9a077fd2c996a495de69be7
+            bebc7b3b5569e4650e09129964a114dea8a4a06bf6a8fac2633f1fc811ed2f5b
+          )
+          : > /tmp/p04-r0-2.b64
+          for i in 0 1 2 3; do
+            dd if=.bootstrap/p04-r0-2.b64 of=/tmp/direct-$i bs=1 skip=$((i*1000)) count=1000 status=none
+            split=.bootstrap/p04-r0-2-s$i.b64
+            direct_sha=$(sha256sum /tmp/direct-$i | awk '{print $1}')
+            split_sha=$(sha256sum "$split" | awk '{print $1}')
+            echo "quarter=$i expected=${expected[$i]} direct=$direct_sha split=$split_sha split_bytes=$(wc -c < "$split")"
+            if [ "$split_sha" = "${expected[$i]}" ]; then
+              cat "$split" >> /tmp/p04-r0-2.b64
+            elif [ "$direct_sha" = "${expected[$i]}" ]; then
+              cat /tmp/direct-$i >> /tmp/p04-r0-2.b64
+            else
+              echo "NO_EXACT_COPY quarter=$i"
+              exit 1
+            fi
+          done
+          test "$(wc -c < /tmp/p04-r0-2.b64)" = "4000"
           echo '65c804454d0e3e11011fd7bc2a44e43f5be2af818fd9b486fbbc145b52751a8d  /tmp/p04-r0-2.b64' | sha256sum -c -
           cp /tmp/p04-r0-2.b64 .bootstrap/p04-r0-2.b64
           git config user.name 'github-actions[bot]'
