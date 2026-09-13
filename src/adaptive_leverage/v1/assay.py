@@ -117,6 +117,8 @@ def measure_v1_normal(
     state: MachineState,
     artifact: MechanismArtifact | None,
     mechanism_artifact_sha256_value: str | None,
+    *,
+    run_id: str | None = None,
 ) -> NormalObservation:
     if arm in {"B", "P", "T"}:
         if artifact is None or mechanism_artifact_sha256_value is None:
@@ -137,7 +139,7 @@ def measure_v1_normal(
     trace = build_v1_trace(
         episode,
         arm=arm,
-        run_id=f"software-normal-{arm.lower()}",
+        run_id=run_id or f"software-normal-{arm.lower()}",
         mechanism_artifact_sha256=mechanism_artifact_sha256_value,
     )
     validate_v1_trace(trace)
