@@ -1,0 +1,219 @@
+{
+  "authority_hashes": {
+    "enumeration_sha256": "6392d4d845250edc4d1a059535e84d1e6bb53a35dbf8bda5f243be35cd0d2ab3",
+    "realization_sha256": "4b24ce642979112747d987b287618fbf16a77a9c4a66a0f2573c30c69256c5a1"
+  },
+  "checks": {
+    "M0_not_sufficient_for_F0": true,
+    "M1_not_sufficient_for_F1": true,
+    "all_four_MF_cells_realizable": true,
+    "dynamic_baseline_correct_but_more_costly": true,
+    "off_manifold_dispatch_measured_after_finalization": true,
+    "partition_count_15_split_4_11": true,
+    "s01_s10_absent_from_adaptive_exposure": true,
+    "same_X_normal_and_J": true,
+    "unique_data_selected_compiled_minimizer_both": true,
+    "within_class_search_nontrivial": true
+  },
+  "compiler_search": {
+    "C_ALPHA": {
+      "candidates": [
+        {
+          "correct_on_X_normal": false,
+          "cost": 5,
+          "g": {
+            "0": "ACT_NA",
+            "1": "ACT_NA"
+          },
+          "name": "T_0_ACT_NA_ACT_NA"
+        },
+        {
+          "correct_on_X_normal": true,
+          "cost": 5,
+          "g": {
+            "0": "ACT_NA",
+            "1": "ACT_NB"
+          },
+          "name": "T_0_ACT_NA_ACT_NB"
+        },
+        {
+          "correct_on_X_normal": false,
+          "cost": 5,
+          "g": {
+            "0": "ACT_NB",
+            "1": "ACT_NA"
+          },
+          "name": "T_0_ACT_NB_ACT_NA"
+        },
+        {
+          "correct_on_X_normal": false,
+          "cost": 5,
+          "g": {
+            "0": "ACT_NB",
+            "1": "ACT_NB"
+          },
+          "name": "T_0_ACT_NB_ACT_NB"
+        },
+        {
+          "correct_on_X_normal": true,
+          "cost": 6,
+          "g": null,
+          "name": "T_dynamic"
+        }
+      ],
+      "selected_g": {
+        "0": "ACT_NA",
+        "1": "ACT_NB"
+      },
+      "unique_minimizer": "T_0_ACT_NA_ACT_NB"
+    },
+    "C_BETA": {
+      "candidates": [
+        {
+          "correct_on_X_normal": false,
+          "cost": 5,
+          "g": {
+            "0": "ACT_NA",
+            "1": "ACT_NA"
+          },
+          "name": "T_1_ACT_NA_ACT_NA"
+        },
+        {
+          "correct_on_X_normal": true,
+          "cost": 5,
+          "g": {
+            "0": "ACT_NA",
+            "1": "ACT_NB"
+          },
+          "name": "T_1_ACT_NA_ACT_NB"
+        },
+        {
+          "correct_on_X_normal": false,
+          "cost": 5,
+          "g": {
+            "0": "ACT_NB",
+            "1": "ACT_NA"
+          },
+          "name": "T_1_ACT_NB_ACT_NA"
+        },
+        {
+          "correct_on_X_normal": false,
+          "cost": 5,
+          "g": {
+            "0": "ACT_NB",
+            "1": "ACT_NB"
+          },
+          "name": "T_1_ACT_NB_ACT_NB"
+        },
+        {
+          "correct_on_X_normal": true,
+          "cost": 6,
+          "g": null,
+          "name": "T_dynamic"
+        }
+      ],
+      "selected_g": {
+        "0": "ACT_NA",
+        "1": "ACT_NB"
+      },
+      "unique_minimizer": "T_1_ACT_NA_ACT_NB"
+    }
+  },
+  "factorial": {
+    "arms": 8,
+    "cells": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        1
+      ]
+    ]
+  },
+  "historical_frozen_integrity": {
+    "ALCF_V2_0_FINITE_REALIZATION_AMENDED_FROZEN.md": {
+      "actual": "4d8d5ef233ee91f15c2db7f00585c5bf1404307354fc11397512090637ac2b24",
+      "expected": "4d8d5ef233ee91f15c2db7f00585c5bf1404307354fc11397512090637ac2b24",
+      "match": true
+    },
+    "ALCF_V2_0_FINITE_REALIZATION_FROZEN.md": {
+      "actual": "790aa9995dd2857a2cbbccba7e2496ca9cacc6bff5d6df666ccaeea4f56ae2f0",
+      "expected": "790aa9995dd2857a2cbbccba7e2496ca9cacc6bff5d6df666ccaeea4f56ae2f0",
+      "match": true
+    }
+  },
+  "normal_workload": {
+    "J_canonical_json": "{\"minimize\":\"causal_microtransition_cost\",\"preserve_observed_normal_correctness\":true}",
+    "J_sha256": "b2be6744a89f0a81d1e043fa60f1bd11b0f8dbe38efeafb981d26808877adb5b",
+    "X_normal_canonical_json": "[{\"baseline_cost\":6,\"i_spec\":[0,0],\"state\":\"s00\",\"target\":\"ACT_NA\"},{\"baseline_cost\":6,\"i_spec\":[1,1],\"state\":\"s11\",\"target\":\"ACT_NB\"}]",
+    "X_normal_sha256": "d477bfb12d9e97f5bc90502530a8d5e25b8a8ed281de22bd15c32b0df0559e84",
+    "observed_states": [
+      "s00",
+      "s11"
+    ],
+    "withheld_normal_states": [
+      "s01",
+      "s10"
+    ]
+  },
+  "partitions": {
+    "M0_partitions": 4,
+    "M1_partitions": 11,
+    "M_alpha": 0,
+    "M_beta": 1,
+    "Pi_alpha": [
+      [
+        "s00",
+        "s01"
+      ],
+      [
+        "s10",
+        "s11"
+      ]
+    ],
+    "Pi_beta": [
+      [
+        "s00",
+        "s10"
+      ],
+      [
+        "s01",
+        "s11"
+      ]
+    ],
+    "Pi_corr": [
+      [
+        "s00",
+        "s01"
+      ],
+      [
+        "s10",
+        "s11"
+      ]
+    ],
+    "W_alpha": [],
+    "W_beta": [
+      [
+        "s00",
+        "s10"
+      ],
+      [
+        "s01",
+        "s11"
+      ]
+    ],
+    "all_carrier_partitions": 15
+  },
+  "scope": "design-time structural audit; no scientific execution",
+  "status": "PASS"
+}
