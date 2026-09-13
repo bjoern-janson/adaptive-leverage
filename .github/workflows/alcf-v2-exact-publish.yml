@@ -1,6 +1,6 @@
 name: Publish exact audited ALCF-V2-0 history
 
-# Exact-history publication gate. Transport-only padding is trimmed before verification. Fresh trigger after p04 diagnosis.
+# Exact-history publication gate. Transport fragments are independently hash-gated before reconstruction.
 on:
   push:
     branches:
@@ -29,7 +29,10 @@ jobs:
           echo 'ddcb541decb3d794cec792aef966ca7e9938923d8b614a5aaa16bcb7ed103d44  .bootstrap/part-02.b64' | sha256sum -c -
           echo '4916cc393ae3a1bd131a7e35b748e0dae2db2cbedf59d3fb49517aea96a49180  .bootstrap/part-03.b64' | sha256sum -c -
 
-          head -c 12000 .bootstrap/p04-r0.b64 > /tmp/p04-r0.b64
+          echo 'e31ff063d058e93f769e25d6ae62c0c27cc1b12fde6661661b67e3f4dd452f5d  .bootstrap/p04-r0-0.b64' | sha256sum -c -
+          echo '6e7b6a6bc860c9b6d971dda442ce14291cf2d92d5b2ba170abb13fc2d41babd0  .bootstrap/p04-r0-1.b64' | sha256sum -c -
+          echo '65c804454d0e3e11011fd7bc2a44e43f5be2af818fd9b486fbbc145b52751a8d  .bootstrap/p04-r0-2.b64' | sha256sum -c -
+          cat .bootstrap/p04-r0-0.b64 .bootstrap/p04-r0-1.b64 .bootstrap/p04-r0-2.b64 > /tmp/p04-r0.b64
           echo '84ee371a0983b9651ed7aad5846a98c57bce10520d417a631e5e50990f0fc85a  /tmp/p04-r0.b64' | sha256sum -c -
           echo 'be7b8015ee2d04e965d4b127b8116ac0d27958e178916260810ced2e3ddf4055  .bootstrap/p04-r1.b64' | sha256sum -c -
           echo 'ba11f47024968da24347e8b8e13b39214049c5469f6f5bb30ae7da69b289fa90  .bootstrap/p04-r2.b64' | sha256sum -c -
