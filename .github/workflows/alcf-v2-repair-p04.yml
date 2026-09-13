@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: bootstrap/alcf-v2-exact-publish
-      - name: Recover exact p04-r0-2 from redundant quarters
+      - name: Recover exact p04-r0-2 from resident redundant copies
         shell: bash
         run: |
           set -euo pipefail
@@ -29,20 +29,47 @@ jobs:
           )
           : > /tmp/p04-r0-2.b64
           for i in 0 1 2 3; do
-            dd if=.bootstrap/p04-r0-2.b64 of=/tmp/direct-$i bs=1 skip=$((i*1000)) count=1000 status=none
-            split=.bootstrap/p04-r0-2-s$i.b64
-            direct_sha=$(sha256sum /tmp/direct-$i | awk '{print $1}')
-            split_sha=$(sha256sum "$split" | awk '{print $1}')
-            echo "quarter=$i expected=${expected[$i]} direct=$direct_sha split=$split_sha split_bytes=$(wc -c < "$split")"
-            if [ "$split_sha" = "${expected[$i]}" ]; then
-              cat "$split" >> /tmp/p04-r0-2.b64
-            elif [ "$direct_sha" = "${expected[$i]}" ]; then
-              cat /tmp/direct-$i >> /tmp/p04-r0-2.b64
-            else
+            found=''
+            want=${expected[$i]}
+            echo "SEARCH quarter=$i expected=$want"
+
+            # candidate spec: file:canonical_offset:radius
+            candidates=(
+              ".bootstrap/p04-r0-2.b64:$((i*1000)):4"
+              ".bootstrap/p04-r0-2-s$i.b64:0:4"
+              ".bootstrap/part-04-04.b64:$((i*1000)):4"
+              ".bootstrap/part-04.b64:$((16000+i*1000)):8"
+              ".bootstrap/p04-r0.b64:$((8000+i*1000)):8"
+            )
+
+            for spec in "${candidates[@]}"; do
+              IFS=: read -r src base radius <<< "$spec"
+              size=$(wc -c < "$src")
+              start=$((base-radius))
+              [ "$start" -lt 0 ] && start=0
+              end=$((base+radius))
+              max_start=$((size-1000))
+              [ "$end" -gt "$max_start" ] && end=$max_start
+              [ "$end" -lt "$start" ] && continue
+              for off in $(seq "$start" "$end"); do
+                dd if="$src" of=/tmp/candidate bs=1 skip="$off" count=1000 status=none
+                [ "$(wc -c < /tmp/candidate)" = "1000" ] || continue
+                got=$(sha256sum /tmp/candidate | awk '{print $1}')
+                if [ "$got" = "$want" ]; then
+                  echo "EXACT quarter=$i source=$src offset=$off"
+                  cat /tmp/candidate >> /tmp/p04-r0-2.b64
+                  found=1
+                  break 2
+                fi
+              done
+            done
+
+            if [ -z "$found" ]; then
               echo "NO_EXACT_COPY quarter=$i"
               exit 1
             fi
           done
+
           test "$(wc -c < /tmp/p04-r0-2.b64)" = "4000"
           echo '65c804454d0e3e11011fd7bc2a44e43f5be2af818fd9b486fbbc145b52751a8d  /tmp/p04-r0-2.b64' | sha256sum -c -
           cp /tmp/p04-r0-2.b64 .bootstrap/p04-r0-2.b64
