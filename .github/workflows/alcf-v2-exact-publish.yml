@@ -1,6 +1,6 @@
 name: Publish exact audited ALCF-V2-0 history
 
-# Exact-history publication gate. Transport-only padding is trimmed before verification.
+# Exact-history publication gate. Transport-only padding is trimmed before verification. Fresh trigger after p04 diagnosis.
 on:
   push:
     branches:
