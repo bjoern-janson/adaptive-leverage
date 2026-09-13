@@ -1,5 +1,6 @@
-name: Diagnose ALCF-V2-0 part04 corrections
+name: Publish exact audited ALCF-V2-0 history
 
+# Exact-history publication gate. Transport-only padding is trimmed before verification.
 on:
   push:
     branches:
@@ -8,19 +9,78 @@ on:
       - .github/workflows/alcf-v2-exact-publish.yml
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  diagnose:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: bootstrap/alcf-v2-exact-publish
-      - name: Report part04 correction identities
+
+      - name: Reconstruct and verify audited bundle
         shell: bash
         run: |
           set -euo pipefail
-          for f in .bootstrap/p04-r0.b64 .bootstrap/p04-r1.b64 .bootstrap/p04-r2.b64; do
-            echo "ACTUAL $f bytes=$(wc -c < "$f") sha256=$(sha256sum "$f" | awk '{print $1}')"
+
+          echo '7fe4fe84a8ac1325b51f95bf65b2cfff805904e1c95da6daaace89ee70d99ce8  .bootstrap/part-00.b64' | sha256sum -c -
+          echo '22c4a958002a1987ae1f426fadd93413d4fa12e3ad81d0d66382fe6738fcb17b  .bootstrap/part-01.b64' | sha256sum -c -
+          echo 'ddcb541decb3d794cec792aef966ca7e9938923d8b614a5aaa16bcb7ed103d44  .bootstrap/part-02.b64' | sha256sum -c -
+          echo '4916cc393ae3a1bd131a7e35b748e0dae2db2cbedf59d3fb49517aea96a49180  .bootstrap/part-03.b64' | sha256sum -c -
+
+          head -c 12000 .bootstrap/p04-r0.b64 > /tmp/p04-r0.b64
+          echo '84ee371a0983b9651ed7aad5846a98c57bce10520d417a631e5e50990f0fc85a  /tmp/p04-r0.b64' | sha256sum -c -
+          echo 'be7b8015ee2d04e965d4b127b8116ac0d27958e178916260810ced2e3ddf4055  .bootstrap/p04-r1.b64' | sha256sum -c -
+          echo 'ba11f47024968da24347e8b8e13b39214049c5469f6f5bb30ae7da69b289fa90  .bootstrap/p04-r2.b64' | sha256sum -c -
+          head -c 8000 .bootstrap/part-04.b64 > /tmp/p04.b64
+          cat /tmp/p04-r0.b64 .bootstrap/p04-r1.b64 .bootstrap/p04-r2.b64 >> /tmp/p04.b64
+          echo '23c38bf4de44cbe027f919ded93a63bb55b65569472d69d034e3902079298305  /tmp/p04.b64' | sha256sum -c -
+
+          echo 'bc98983dc0cafd2ad23e70b41ed165b20a07b305c2aee9ce83c0cd25766f52c1  .bootstrap/p05-r0.b64' | sha256sum -c -
+          echo 'fd72fe112e4fa65b000cfda9edea4189608f69922ba89c01276d2223f6d24b00  .bootstrap/p05-r1.b64' | sha256sum -c -
+          echo '417ae9d265969e5ce00267ddde6491ae26a1de5693a1a67a10ddd23b03563af5  .bootstrap/p05-r2-0.b64' | sha256sum -c -
+          echo 'b4a7ec97c20224f4cdd00d56c1785968c55349bd7b3d13b475ea7e61ba596762  .bootstrap/p05-r2-1.b64' | sha256sum -c -
+          echo '77d339b9774e283bb56883741b454087363092cf6c85ad49fb89d198297c0963  .bootstrap/p05-r2-2.b64' | sha256sum -c -
+          head -c 8000 .bootstrap/part-05.b64 > /tmp/p05.b64
+          cat .bootstrap/p05-r0.b64 .bootstrap/p05-r1.b64 .bootstrap/p05-r2-0.b64 .bootstrap/p05-r2-1.b64 .bootstrap/p05-r2-2.b64 >> /tmp/p05.b64
+          echo '0d3590eadfa13cf2b6d9f396df977f844867d6b04f6b79407610151184b89ac2  /tmp/p05.b64' | sha256sum -c -
+
+          echo '8c4ec611329393e0d2d1a47bb5e84ab366e854d638377ac12d516263d0275312  .bootstrap/tail-00.b64' | sha256sum -c -
+          echo '43c7fb7fb091fef5f3d7cef4074249b6ccfb7da11e250e43401cbf73aab9f236  .bootstrap/tail01-fixed-0.b64' | sha256sum -c -
+          echo '9b9ab4b4936756996ee4db0246de6dc31bb4ce0453ab90c3810b3689268e96b4  .bootstrap/tail01-fixed-1.b64' | sha256sum -c -
+          echo '879d892f536d0f8632901b1c4d026fba6d96e1f26c567186c0a84355f0d193d7  .bootstrap/tail01-fixed-2.b64' | sha256sum -c -
+          cat .bootstrap/tail01-fixed-0.b64 .bootstrap/tail01-fixed-1.b64 .bootstrap/tail01-fixed-2.b64 > /tmp/t01.b64
+          echo '6c895c4a041896957bdd4a13c69e9ab5493bfcc26462f58eadf1e30bc8daff87  /tmp/t01.b64' | sha256sum -c -
+          echo 'eab84dd3f6e2efbd9db246e42c76652f1d9b8981447df3b7e2b78e44c211fe9f  .bootstrap/tail-02.b64' | sha256sum -c -
+          echo '8d105e301151ba0c28a7a70151e6d4aa5923855f1d036710838f8836b0da041f  .bootstrap/tail-03.b64' | sha256sum -c -
+          echo '576a282f2fdf9797a591888fce83bb7a6fae25e73dfbaa7e28132a275696e669  .bootstrap/tail-04.b64' | sha256sum -c -
+          echo '160f70fadc785747559b116cac6457eb0bb924cf453c5a8ad3b69fb2243803a4  .bootstrap/tail-05.b64' | sha256sum -c -
+
+          cat .bootstrap/tail-06-00.b64 .bootstrap/tail-06-01.b64 .bootstrap/tail-06-02.b64 > /tmp/t06.b64
+          echo 'f5a76c432527d5fe4ec639e6ecd13fb00a017baea3d7e923e98d2036e5341d34  /tmp/t06.b64' | sha256sum -c -
+          cat .bootstrap/tail-07-00.b64 .bootstrap/tail-07-01.b64 .bootstrap/tail-07-02.b64 > /tmp/t07.b64
+          echo '1f88f0110aa6ca6fc2749223e3c432c051bafad7d213e5d00fdeca67f8ee48e4  /tmp/t07.b64' | sha256sum -c -
+
+          : > /tmp/alcf-v2.bundle
+          for f in .bootstrap/part-00.b64 .bootstrap/part-01.b64 .bootstrap/part-02.b64 .bootstrap/part-03.b64 /tmp/p04.b64 /tmp/p05.b64 .bootstrap/tail-00.b64 /tmp/t01.b64 .bootstrap/tail-02.b64 .bootstrap/tail-03.b64 .bootstrap/tail-04.b64 .bootstrap/tail-05.b64 /tmp/t06.b64 /tmp/t07.b64; do
+            base64 -d "$f" >> /tmp/alcf-v2.bundle
           done
+
+          test "$(wc -c < /tmp/alcf-v2.bundle)" = "146969"
+          echo 'f136d36fbcfe5df9a1c0eadd1b382fb4ee20e34d8b7f28e0e4f76a31a98b00e0  /tmp/alcf-v2.bundle' | sha256sum -c -
+
+          rm -rf /tmp/alcf-v2-import
+          git clone --branch impl/alcf-v2-0 /tmp/alcf-v2.bundle /tmp/alcf-v2-import
+          test "$(git -C /tmp/alcf-v2-import rev-parse HEAD)" = "8fcad36b84caa8a496f29b16cf29257565c75a41"
+          test "$(git -C /tmp/alcf-v2-import rev-parse 'HEAD^{tree}')" = "ca5f11510ce8348368cbf1254a784e48d72a0b29"
+          git -C /tmp/alcf-v2-import fsck --full
+
+      - name: Publish exact audited branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git -C /tmp/alcf-v2-import remote add publish "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git -C /tmp/alcf-v2-import push publish 8fcad36b84caa8a496f29b16cf29257565c75a41:refs/heads/impl/alcf-v2-0
