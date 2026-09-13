@@ -1,5 +1,6 @@
 name: Publish exact audited ALCF-V2-0 history
 
+# Payload complete: retrigger exact-history publication.
 on:
   push:
     branches:
