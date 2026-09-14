@@ -87,6 +87,7 @@ jobs:
             '30596af6b35bbbe566201fd0af6644f4a2db014410e234a28c8ff9ee1585deeb' 'prereg/ALCF_V2_0_PREREG_FREEZE_RECORD.txt' | sha256sum -c -
 
           test "$(git hash-object README.md)" = 'a47f7e2769e0f2a40f15426a9d047acdeb1dbe51'
+          python -m pip install 'pytest>=8'
           pytest -q
           python -m compileall -q src
 
