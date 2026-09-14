@@ -23,16 +23,26 @@ jobs:
         run: |
           set -euo pipefail
           echo 'b9d8f9f54514791c010f7fb0dce9bfe13f8790d875dcd7e065833d301c3d82a1  .bootstrap/fossil-part-00.hex' | sha256sum -c -
-          echo '7e0fbcfdac86a52f81d40391a28ccae68fa77039f0ab71da7c9b7f24eb968bc9  .bootstrap/fossil-part-01.hex' | sha256sum -c -
+          echo 'a3f0d0a406d2ea7b40990da6ad2165a1ca705d9b4fc1b7faf974f7137baed8c0  .bootstrap/p01-0.hex' | sha256sum -c -
+          echo '4771003c1743010d9e65ee934fdb909e09bcc73d96639d510f2005131a0403f8  .bootstrap/p01-1.hex' | sha256sum -c -
+          echo '38fe96275751d696547099f11a691716bb356bf5d672784c87121a526e091b7f  .bootstrap/p01-2.hex' | sha256sum -c -
+          echo '06ca6f31f374570fa461d210fd815e38043ab77ed7c6ecde76ee34fff37ea398  .bootstrap/p01-3.hex' | sha256sum -c -
+          echo '312ab5e5476c1c24a557b476fc2bc733617cd3780e05e98873df4170183ead58  .bootstrap/p01-4.hex' | sha256sum -c -
+          echo '83f06675466a78342f5ee919f48ce10f9c5c3c29c742c506cb4f15575d69d39f  .bootstrap/p01-5.hex' | sha256sum -c -
+          echo 'b0b23902d522241b29c3a0ce538193325f7f85c4009cb2492b8f2a7d10e5bbda  .bootstrap/p01-6.hex' | sha256sum -c -
+          echo 'cac231a8e133cc9719cff09a679a282da80ac1e2c08efc6f06260f6c5168b7be  .bootstrap/p01-7.hex' | sha256sum -c -
           echo '9de8a809d88a2252609a41a9b5d7d43326eeee921a191969491648a09066df94  .bootstrap/fossil-part-02.hex' | sha256sum -c -
           echo 'b0d63cda2119702e33d0cbd13691d25abd2e2ea373d8c19a2e4ceb9740d9c5b8  .bootstrap/fossil-part-03.hex' | sha256sum -c -
           echo 'dfd21a07ac4b90257b4a0270896eee98df65b5a250ccdcfd515bff7336023763  .bootstrap/fossil-part-04.hex' | sha256sum -c -
           test "$(wc -c < .bootstrap/fossil-part-00.hex)" = 8000
-          test "$(wc -c < .bootstrap/fossil-part-01.hex)" = 8000
+          for f in .bootstrap/p01-{0,1,2,3,4,5,6,7}.hex; do test "$(wc -c < "$f")" = 1000; done
+          cat .bootstrap/p01-{0,1,2,3,4,5,6,7}.hex > /tmp/part01.hex
+          test "$(wc -c < /tmp/part01.hex)" = 8000
+          echo '7e0fbcfdac86a52f81d40391a28ccae68fa77039f0ab71da7c9b7f24eb968bc9  /tmp/part01.hex' | sha256sum -c -
           test "$(wc -c < .bootstrap/fossil-part-02.hex)" = 8000
           test "$(wc -c < .bootstrap/fossil-part-03.hex)" = 8000
           test "$(wc -c < .bootstrap/fossil-part-04.hex)" = 10
-          cat .bootstrap/fossil-part-{00,01,02,03,04}.hex > /tmp/fossil_payload.hex
+          cat .bootstrap/fossil-part-00.hex /tmp/part01.hex .bootstrap/fossil-part-02.hex .bootstrap/fossil-part-03.hex .bootstrap/fossil-part-04.hex > /tmp/fossil_payload.hex
           test "$(wc -c < /tmp/fossil_payload.hex)" = 32010
           echo 'bc5c86016f3372ebe55b2795a840bd7b4d97674ba9d1c2d37af2142effaba446  /tmp/fossil_payload.hex' | sha256sum -c -
           xxd -r -p /tmp/fossil_payload.hex > /tmp/fossil_payload.tar.gz
