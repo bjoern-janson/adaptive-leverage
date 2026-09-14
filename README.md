@@ -30,13 +30,13 @@ ALCF-V1 PREREGISTRATION        FROZEN
 ALCF-V1 IMPLEMENTATION         PRESENT
 ALCF-V2-0 DESIGN AUTHORITY     FROZEN
 ALCF-V2-0 PREREGISTRATION      FROZEN
-ALCF-V2-0 IMPLEMENTATION       PRESENT (DORMANT RUNNER)
-ALCF-V2-0 CORRECTIVE RELEASE   NOT RUN
-ALCF-V2-0 R / F / D / C_MF_obs UNOBSERVED
-ALCF-V2-0 SCIENTIFIC RESULT    NONE
+ALCF-V2-0 IMPLEMENTATION       PRESENT
+ALCF-V2-0 SCIENTIFIC RUN       ALCF-V2-0-001 (VALID, SINGLE CANONICAL FIRST RUN)
+ALCF-V2-0 R / F / D / C_MF_obs OBSERVED
+ALCF-V2-0 SCIENTIFIC RESULT    FOSSILIZED UNDER scientific_runs/ALCF-V2-0-001/
 ```
 
-Repository implementation presence does not authorize scientific execution. Frozen protocol artifacts are authoritative; editorial summaries in this README do not override them.
+Repository implementation presence does not authorize further scientific execution. Frozen protocol artifacts are authoritative; editorial summaries in this README do not override them.
 
 - `prereg/ALCF_V0_PREREG_FROZEN.md` — frozen V0 preregistration
 - `prereg/ALCF_V0_PROTOCOL_FROZEN.json` — machine-readable frozen V0 protocol
@@ -44,6 +44,7 @@ Repository implementation presence does not authorize scientific execution. Froz
 - `prereg/ALCF_V2_0_FINITE_REALIZATION_DIAGONAL_FROZEN.md` — frozen V2-0 finite-realization authority
 - `prereg/ALCF_V2_0_PREREG_FROZEN.md` — frozen V2-0 preregistration bytes
 - `prereg/ALCF_V2_0_PREREG_FREEZE_RECORD.txt` — V2-0 freeze custody record
+- `scientific_runs/ALCF-V2-0-001/SCIENTIFIC_RESULT.md` — bounded interpretation of the first valid V2-0 scientific execution
 
 The capability intervention is subject to a custody restriction: it must be derived exclusively from the preregistered normal workload, with the corrective condition withheld until the intervention is finalized and hashed.
 
@@ -57,6 +58,8 @@ A clean null is a valid result:
 \Delta\operatorname{Cap}>0\not\Rightarrow\text{corrective foreclosure}.
 \]
 
+For ALCF-V2-0-001, the observed finite-assay result supports only the bounded interpretation recorded with the run. It does **not** establish that partition mismatch is sufficient or necessary for corrective foreclosure, a general safety theorem, or a claim about neural-network or frontier-system behavior.
+
 ## Execution boundary
 
-Implementation must instantiate the frozen protocol rather than revise it. Execution and scientific interpretation are separate later steps. Any ambiguity that cannot be resolved without changing protocol semantics is a protocol defect, not permission for a silent implementation choice.
+Implementation must instantiate the frozen protocol rather than revise it. ALCF-V2-0-001 is the canonical first scientific execution and must not be replaced by a rerun. Any future experiment requires a separately authorized protocol/result identity rather than mutation of this run.

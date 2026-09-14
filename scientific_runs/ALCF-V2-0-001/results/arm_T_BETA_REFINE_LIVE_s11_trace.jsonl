@@ -1,0 +1,1 @@
+{"challenge_token":"z1","challenged_id":"s11","post_candidates":["s11"],"pre_candidates":["s01","s11"],"qualified_route":true,"resolved_consequence":{"authority":"CORR_AUTH","label":"SET_C1","scope":"OPEN","state_update":"SET_C1","terminal_action":"ACT_C1","warrant":"CORRECTION"},"state_write_realized":true,"terminal_action":"ACT_C1"}
