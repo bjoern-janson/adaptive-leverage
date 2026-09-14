@@ -1,0 +1,96 @@
+name: Publish fossilized ALCF-V2-0-001 result
+
+on:
+  push:
+    branches:
+      - bootstrap/alcf-v2-0-001-fossilize
+    paths:
+      - .github/workflows/alcf-v2-0-001-fossilize.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fossilize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: bootstrap/alcf-v2-0-001-fossilize
+
+      - name: Reconstruct and verify fossil payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'b9d8f9f54514791c010f7fb0dce9bfe13f8790d875dcd7e065833d301c3d82a1  .bootstrap/fossil-part-00.hex' | sha256sum -c -
+          echo '7e0fbcfdac86a52f81d40391a28ccae68fa77039f0ab71da7c9b7f24eb968bc9  .bootstrap/fossil-part-01.hex' | sha256sum -c -
+          echo '9de8a809d88a2252609a41a9b5d7d43326eeee921a191969491648a09066df94  .bootstrap/fossil-part-02.hex' | sha256sum -c -
+          echo 'b0d63cda2119702e33d0cbd13691d25abd2e2ea373d8c19a2e4ceb9740d9c5b8  .bootstrap/fossil-part-03.hex' | sha256sum -c -
+          echo 'dfd21a07ac4b90257b4a0270896eee98df65b5a250ccdcfd515bff7336023763  .bootstrap/fossil-part-04.hex' | sha256sum -c -
+          test "$(wc -c < .bootstrap/fossil-part-00.hex)" = 8000
+          test "$(wc -c < .bootstrap/fossil-part-01.hex)" = 8000
+          test "$(wc -c < .bootstrap/fossil-part-02.hex)" = 8000
+          test "$(wc -c < .bootstrap/fossil-part-03.hex)" = 8000
+          test "$(wc -c < .bootstrap/fossil-part-04.hex)" = 10
+          cat .bootstrap/fossil-part-{00,01,02,03,04}.hex > /tmp/fossil_payload.hex
+          test "$(wc -c < /tmp/fossil_payload.hex)" = 32010
+          echo 'bc5c86016f3372ebe55b2795a840bd7b4d97674ba9d1c2d37af2142effaba446  /tmp/fossil_payload.hex' | sha256sum -c -
+          xxd -r -p /tmp/fossil_payload.hex > /tmp/fossil_payload.tar.gz
+          test "$(wc -c < /tmp/fossil_payload.tar.gz)" = 16005
+          echo '1d1337917d2d6af8eaa59476adfa3dca09f3fa256b83102fe121cef4bfb24bc7  /tmp/fossil_payload.tar.gz' | sha256sum -c -
+          mkdir -p /tmp/fossil_payload
+          tar -xzf /tmp/fossil_payload.tar.gz -C /tmp/fossil_payload
+          test -f /tmp/fossil_payload/README.md
+          test -d /tmp/fossil_payload/scientific_runs/ALCF-V2-0-001
+          test "$(find /tmp/fossil_payload -mindepth 1 -maxdepth 1 -printf '%f\n' | sort | tr '\n' ' ')" = 'README.md scientific_runs '
+
+      - name: Construct exact clean fossil commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/final
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" /tmp/final
+          git -C /tmp/final fetch origin main
+          test "$(git -C /tmp/final rev-parse origin/main)" = 'aed36ad4a2bc0980e43fa4b51818889eebb492a8'
+          git -C /tmp/final checkout --detach aed36ad4a2bc0980e43fa4b51818889eebb492a8
+          test "$(git -C /tmp/final rev-parse 'HEAD^{tree}')" = '981bce9bfac76e34475ebfa6f29aef6e4e6fb525'
+
+          cp /tmp/fossil_payload/README.md /tmp/final/README.md
+          mkdir -p /tmp/final/scientific_runs
+          cp -a /tmp/fossil_payload/scientific_runs/ALCF-V2-0-001 /tmp/final/scientific_runs/
+
+          cd /tmp/final/scientific_runs/ALCF-V2-0-001/results
+          sha256sum -c SHA256SUMS.txt
+          cd ..
+          sha256sum -c FOSSILIZATION_SHA256SUMS.txt
+
+          cd /tmp/final
+          printf '%s  %s\n' \
+            '4b24ce642979112747d987b287618fbf16a77a9c4a66a0f2573c30c69256c5a1' 'prereg/ALCF_V2_0_FINITE_REALIZATION_DIAGONAL_FROZEN.md' \
+            '6392d4d845250edc4d1a059535e84d1e6bb53a35dbf8bda5f243be35cd0d2ab3' 'prereg/ALCF_V2_0_FINITE_REALIZATION_DIAGONAL_ENUMERATION_FROZEN.csv' \
+            '1cf0cee982c56a9548a4b1d62a54485ddb425c1acad53ca616c5d8d29923c944' 'prereg/ALCF_V2_0_FINITE_REALIZATION_DIAGONAL_AUDIT.json' \
+            '49b1a332293fc1c8386fdb4e06b25b2a53b37c452caba71567bea46cc2cc0ea7' 'prereg/ALCF_V2_0_FINITE_REALIZATION_DIAGONAL_SHA256SUMS_FROZEN.txt' \
+            '9a9cb7c074ca7c928f59cc2efa69585b05faa0ffbc128dcf6b0ed699c268d12b' 'prereg/ALCF_V2_0_PREREG_FROZEN.md' \
+            '74a8fbf45cb861a63d7170d579790173e82c12f147bf41bc3f48f8fabd3c7242' 'prereg/ALCF_V2_0_PREREG_SHA256SUMS_FROZEN.txt' \
+            '30596af6b35bbbe566201fd0af6644f4a2db014410e234a28c8ff9ee1585deeb' 'prereg/ALCF_V2_0_PREREG_FREEZE_RECORD.txt' | sha256sum -c -
+
+          test "$(git hash-object README.md)" = 'a47f7e2769e0f2a40f15426a9d047acdeb1dbe51'
+          pytest -q
+          python -m compileall -q src
+
+          git add README.md scientific_runs/ALCF-V2-0-001
+          bad=$(git diff --cached --name-only | grep -Ev '^(README\.md|scientific_runs/ALCF-V2-0-001/)' || true)
+          test -z "$bad"
+          test "$(git diff --cached --name-only | wc -l)" = 64
+          tree=$(git write-tree)
+          echo "FINAL_TREE=$tree"
+          test "$tree" = 'ffe48aff3f9a2f319b17e6146e4449a471c9b9f2'
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Fossilize ALCF-V2-0-001 first scientific result'
+          test "$(git rev-parse HEAD^)" = 'aed36ad4a2bc0980e43fa4b51818889eebb492a8'
+          test "$(git rev-parse 'HEAD^{tree}')" = 'ffe48aff3f9a2f319b17e6146e4449a471c9b9f2'
+          git push origin HEAD:refs/heads/fossil/alcf-v2-0-001
