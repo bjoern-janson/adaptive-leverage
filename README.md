@@ -20,22 +20,30 @@ R_{t+1}(c^\star\mid e^\star,\omega^\star)=\varnothing,
 
 plus provenance showing that route loss is attributable to the capability transition rather than to a warrant-validating epistemic transition.
 
-## Current state
+## Current repository state
 
 ```text
-ALCF-V0 DESIGN        CLOSED
-ALCF-V0 PROTOCOL      FROZEN
-PROTOCOL MUTATION     FORBIDDEN
-IMPLEMENTATION        NOT YET LANDED
-EXECUTION             NOT STARTED
-SCIENTIFIC RESULT     NONE
+ALCF-V0 DESIGN                 CLOSED
+ALCF-V0 PROTOCOL               FROZEN
+ALCF-V0 IMPLEMENTATION         PRESENT
+ALCF-V1 PREREGISTRATION        FROZEN
+ALCF-V1 IMPLEMENTATION         PRESENT
+ALCF-V2-0 DESIGN AUTHORITY     FROZEN
+ALCF-V2-0 PREREGISTRATION      FROZEN
+ALCF-V2-0 IMPLEMENTATION       PRESENT (DORMANT RUNNER)
+ALCF-V2-0 CORRECTIVE RELEASE   NOT RUN
+ALCF-V2-0 R / F / D / C_MF_obs UNOBSERVED
+ALCF-V2-0 SCIENTIFIC RESULT    NONE
 ```
 
-The frozen protocol is authoritative. Editorial summaries in this README do not override it.
+Repository implementation presence does not authorize scientific execution. Frozen protocol artifacts are authoritative; editorial summaries in this README do not override them.
 
-- `prereg/ALCF_V0_PREREG_FROZEN.md` — human-readable frozen preregistration
-- `prereg/ALCF_V0_PROTOCOL_FROZEN.json` — machine-readable frozen protocol
-- `prereg/ALCF_V0_SHA256SUMS_FROZEN.txt` — frozen artifact hashes
+- `prereg/ALCF_V0_PREREG_FROZEN.md` — frozen V0 preregistration
+- `prereg/ALCF_V0_PROTOCOL_FROZEN.json` — machine-readable frozen V0 protocol
+- `prereg/ALCF_V1_PREREG_FROZEN.md` — frozen V1 preregistration
+- `prereg/ALCF_V2_0_FINITE_REALIZATION_DIAGONAL_FROZEN.md` — frozen V2-0 finite-realization authority
+- `prereg/ALCF_V2_0_PREREG_FROZEN.md` — frozen V2-0 preregistration bytes
+- `prereg/ALCF_V2_0_PREREG_FREEZE_RECORD.txt` — V2-0 freeze custody record
 
 The capability intervention is subject to a custody restriction: it must be derived exclusively from the preregistered normal workload, with the corrective condition withheld until the intervention is finalized and hashed.
 
