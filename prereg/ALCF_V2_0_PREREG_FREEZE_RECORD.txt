@@ -1,0 +1,18 @@
+ALCF-V2-0 PREREGISTRATION FREEZE RECORD
+
+Status: FROZEN — PRE-IMPLEMENTATION / PRE-EXECUTION
+Authority artifact: ALCF_V2_0_PREREG_FROZEN.md
+Canonical SHA-256: 9a9cb7c074ca7c928f59cc2efa69585b05faa0ffbc128dcf6b0ed699c268d12b
+Frozen from reviewed artifact: ALCF_V2_0_PREREG_DIAGONAL_REVIEWED_DRAFT.md
+Byte relation: EXACT COPY; no byte changes at freeze.
+
+Note: The authority artifact intentionally preserves the reviewed artifact's internal title/status text verbatim. Freeze status is established by this external custody record and checksum manifest so that the user-approved canonical fingerprint remains unchanged.
+
+Scientific state at freeze:
+- finite realization: FROZEN AUTHORITY
+- preregistration: FROZEN
+- implementation: NOT STARTED
+- joint admission: NOT RUN
+- corrective release: NOT RUN
+- R / F / D / C_MF_obs: UNOBSERVED
+- scientific result: NONE
